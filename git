@@ -1,0 +1,8 @@
+git commands:
+  git remote set-url origin *argument 
+    to change the remote url,
+  git stash , to save your uncommited changes before pulling
+  git pull
+  git stash pop , to  merge with the updated branch,
+
+
