@@ -271,6 +271,9 @@ Whats the use of this IIFE?
 ANYTHING INSIDE PARANTHESES IN JAVASCRIPT IS AN EXPRESSION. 
 functions can also be written inside the parantheses. 
 
+closure depends on where a function is defined (lexical environment)
+
+this variable depends on where and when a function is called( dynamic )
 
 UNDERSTANDING CLOSURES:
     When we create a function, which in turn returns a function, and if we use a variable which was in the outer function but not declared in the inner function, still the inner function is able to use the variable defined outside,even though the execution context of the outer function would have been removed from the execution stack. 
@@ -281,10 +284,6 @@ this is called closure. This allows our function to use the  variables defined o
 
 
 when we invoke the functions in the array as in the example ,those  functions still have access to the variable of the outer environment , as they are still stored in the memory. 
-when we invoke the functions in the array as in the example ,those  functions still have access to the variable of the outer environment , as they are still stored in the memory. 
-
-
-
 
 
 
@@ -473,3 +472,330 @@ Lessons from jQuery
 Structuring Safe Code:
     exposing only what we need to the global environment
     
+You cannot change the same bounded code twice
+
+In arrow functions , this retains the value of the enclosing lexical context's value of this
+so in arrow functions it doesnt mattter from where or how it is called , what matters is how it is created
+Arrow functions do not have their own this value , and it is not set dynamically
+
+var o = {prop: 37};
+
+function independent() {
+  return this.prop;
+}
+
+o.f = independent;
+
+console.log(o.f()); // 37
+
+this example is important to understand, this value depends on how the function was called, and not where it was defined
+Other values may obviously depend on where it was defined , but currently we are talking about this variable
+
+Similarly, the this binding is only affected by the most immediate member reference. In the following example, when we invoke the function, we call it as a method g of the object o.b. This time during execution, this inside the function will refer to o.b. The fact that the object is itself a member of o has no consequence; the most immediate reference is all that matters.
+
+o.b = {g: independent, prop: 42};
+console.log(o.b.g()); // 42
+
+
+Important : 
+When a function is used as an event handler , the this value is set to the element that fired the event.
+Some browsers do not follow this standard but. 
+this === e.target
+
+
+Object.create:
+let p = Object.create(o);
+
+p is an object , whose __proto__ is o, basically p inherits from o. 
+
+
+Explaining Promises : 
+
+Often times in real life programming, 
+we find situations ,
+
+    where we have a producing code 
+    and a consuming code , which takes the result of the producing code 
+
+A promise is a special Javascript object that links the producing code and the
+consuming code together,  The producing code takes whatever time it needs to produce the
+promised result and when the promise makes that result available to all of the subscribed code when it is ready. 
+
+let promise = new Promise(function(resolve, reject){
+    //executor
+})
+
+The resulting promise object has internal properties, 
+state - initially pending , that changes to either fulfilled or rejected. 
+result - an arbitrary value of your choosing, initially undefined. 
+
+When the promise is created, the executor function which is passed runs 
+automatically.  IMPORTANT . 
+
+When the executor finishes the job, it should call one of the functions , that are passed 
+as arguments  : 
+resolve(value ) - to indicate that job has finished successfully,
+sets state  to fulfilled .
+sets result to value. 
+
+reject error : 
+sets state to 'rejected'
+sets result to error 
+
+After finishing the job, the executor function should call resolve or reject to change the state from
+"pending" to "fulfilled" or "rejected"
+
+A  PROMISE'S STATE CHANGE IS FINAL. 
+IT CAN BE SET ONLY ONCE 
+Example : 
+
+let promise = new Promise(function(resolve, reject) {
+    resolve("done");
+  
+    reject(new Error("…")); // ignored
+    setTimeout(() => resolve("…")); // ignored
+  });
+
+  It is better to call reject with an error object so that it is easier to handle 
+
+  The state and result are internal amd can be accessed through the consumer functions then, catch, finally.
+
+  Consuming functions can be registered using the methods try, catch, and finally 
+
+then 
+
+syntax is 
+  promise.then(function(result) {}, function(error){});
+
+if only interested in succesfull completions , we can provide only one argument to 
+.then 
+promise.then(function(result){});
+
+catch 
+
+analog of .then(null, function(error){});
+
+finally 
+
+the call .finally(f) is similar to .then(f, f) in the sense that it always runs whether the promise is settled : be it resolve or reject 
+SO when the state of the promise is changed to "settled" ("resolved" or "rejected"),
+the subscribed function is run . 
+
+Finally passes the errors and the results to the next handler . 
+https://javascript.info/promise-basics
+
+On settled promises the handlers are run immediately 
+
+let promise = new Promise(resolve => resolve("done!"));
+
+promise.then(alert);
+
+
+so until here , we can attach multiple then functions to the same promise and they all
+will run, whether they are settled synchronously or asynchronously , it doesn't matter
+
+
+THE CHAINING OF PROMISES : 
+
+A call to promise.then returns a promise . 
+This allows us to chain together many then handlers on one promise 
+
+promise.then(() => {}).then(() => {}); //one serial path
+is different from 
+promise.then(() => {})
+promise.then(() => {}) //two parallel paths
+
+When  a handler in the chain returns  a promise during its execution , 
+
+DIFFERENCE BETWEEN console.error() console.error and why we use console.error.bind(console)
+
+console.error() == error function called with this set to console (window.console)
+console.error == reference to the error function , when called as such , the this variable is set to window, leading to illegal invocation 
+so we do let error_fn = console.error.bind(this);
+
+
+If an error occurs anywhere along the promise chain, the error jumps to the nearest catch statement or normal rejection handler, and the error is handled there. 
+In case of no error handlers and an error occurs, then an error is thrown on the window, with name unhandledrejection. 
+Also, the executor functions have hidden internal try catch clauses, so any error can be caught, not necessarily by the reject statement . 
+
+.catch handles promise rejections of all kinds: be it a reject() call, or an error thrown in a handler.
+We should place .catch exactly in places where we want to handle errors and know how to handle them. The handler should analyze errors (custom error classes help) and rethrow unknown ones.
+It’s normal not to use .catch if we don’t know how to handle errors (all errors are unrecoverable).
+In any case we should have the unhandledrejection event handler (for browsers, and analogs for other environments), to track unhandled errors and inform the user (and probably our server) about the them. So that our app never “just dies”.
+
+
+Returning promises is a way of avoiding callback hell 
+.catch handles promise rejections of all kinds: be it a reject() call, or an error thrown in a handler.
+We should place .catch exactly in places where we want to handle errors and know how to handle them. The handler should analyze errors (custom error classes help) and rethrow unknown ones.
+It’s normal not to use .catch if we don’t know how to handle errors (all errors are unrecoverable).
+In any case we should have the unhandledrejection event handler (for browsers, and analogs for other environments), to track unhandled errors and inform the user (and probably our server) about the them. So that our app never “just dies”.
+And finally, if we have load-indication, then .finally is a great handler to stop it when the fetch is complete:
+
+ 
+
+
+
+
+
+
+
+Important points from JavascriptInfo
+
+
+
+
+
+function demoGithubUser() {
+  let name = prompt("Enter a name?", "iliakan");
+
+  document.body.style.opacity = 0.3; // (1) start the indication
+
+  return loadJson(`https://api.github.com/users/${name}`)
+    .finally(() => { // (2) stop the indication
+      document.body.style.opacity = '';
+      return new Promise(resolve => setTimeout(resolve, 0)); // (*)
+    })
+    .then(user => {
+      alert(`Full name: ${user.name}.`);
+      return user;
+    })
+    .catch(err => {
+      if (err instanceof HttpError && err.response.status == 404) {
+        alert("No such user, please reenter.");
+        return demoGithubUser();
+      } else {
+        throw err;
+      }
+    });
+}
+
+demoGithubUser();
+Here on the line (1) we indicate loading by dimming the document. The method doesn’t matter, could use any type of indication instead.
+
+When the promise is settled, be it a successful fetch or an error, finally triggers at the line (2) and stops the indication.
+
+There’s a little browser trick (*) with returning a zero-timeout promise from finally. That’s because some browsers (like Chrome) need “a bit time” outside promise handlers to paint document changes. So it ensures that the indication is visually stopped before going further on the chain.
+
+
+https://javascript.info/task/error-async
+Even then we cannot catch asynchronous errors ,as they are not caught by the implicit try..catch block 
+Also once a promise is settled , its value cannot be changed(state) 
+
+
+THE PROMISE HANDLERS QUEUE : 
+
+Promise handlers are always asynchronous ,( similar to setTimeout)
+Even for immediately resolved promises. 
+
+Promise queue has a separate queue , like the events queue . 
+Promise queue has higher priority than environment-related queues.
+
+
+PROMISE HANDLING IS ALWAYS ASYNCHRONOUS 
+
+SO the then, catch, finally are called after the code has finished running 
+
+Environment specific events occur after the promise queue is empty 
+
+Promise.resolve()   for wrapping a value in promise , this can be used to continue the promise chain. 
+
+Promise.reject() for wrapping a value in promise, 
+
+Promise.all() 
+ A method to run several promises parallely , resolved only when everything has finished executing . 
+ Non promise objects are wrapped using Promise.resolve()
+
+ In case of errors , 
+ The important detail is that promises provide no way to “cancel” or “abort” their execution. So other promises continue to execute, and the eventually settle, but all their results are ignored.
+
+ In case error must be raised immediately, we can use promise.race( )
+ which stops with the first error / result 
+
+
+
+
+Next important syntax : 
+Async/ Await 
+
+Async : 
+The word async before a function means one simple thing ,
+a function that always returns a promise 
+
+Even if a function returns a non promise value, it gets automatically wrapped in a resolved promise 
+
+
+Await : 
+
+The keyword await makes javascript wait until the promise settles and returns its result 
+
+let result = await promise ;
+
+
+you cannot use await inside normal functions , that would be a syntax error. 
+
+If we do not try catch to catch the errors inside, the result of the async function 
+becomes a rejected Promise, whose error can be caught by doing , 
+.catch(e => console.log(e));
+
+
+
+
+IF YOU THROW AN ERROR INSIDE A THEN STATEMENT OR INSIDE THE EXECUTOR FNUCTION 
+WHILE WRITING A PROMISE, IT WILL BE SWALLOWED BY REJECT AND NEVER HEARD OF AGAIN, 
+IF YOU DO NOT WRITE THE CATCH BLOCK. 
+THIS CAN BE ESPECIALLY PROBLEMATIC IN MOCHA, WHERE YOU MAY NOT HAVE ATTACHED ,
+    window.addEventListener('unhandledrejection', () => {});
+
+
+SOME IMPORTANT ADVICE : 
+When your assertion fails or when the promise rejects, you will get this failure:
+
+Error: timeout of 2000ms exceeded. Ensure done() is being called.
+Normally, if code throws an error, Mocha catches the error and displays it as the reason for a failing test. If you throw an Error inside the then, the error will be swallowed by the promise, which will then reject. Mocha never hears about the error, stops waiting after 2 seconds and throws a timeout.
+
+Forget ‘done’ and you have an evergreen test
+If you forget to add ‘done’ as an argument to ‘it’
+, you will not get a “done is not defined”. 
+Remember, an error inside a then will just cause
+the promise to reject, which has no effect at all
+. Mocha never knows it has to wait for ‘done()’. Your test will now be
+evergreen. It will never fail, even if your code is broken.
+
+One method to fix : 
+use .finally(done)
+
+One of chai's recommendations : 
+
+Chai as Promised extends Chai with a fluent language for asserting facts about promises.
+
+Instead of manually wiring up your expectations to a promise's fulfilled and rejected handlers:
+
+doSomethingAsync().then(
+    function (result) {
+        result.should.equal("foo");
+        done();
+    },
+    function (err) {
+       done(err);
+    }
+);
+you can write code that expresses what you really mean:
+
+return doSomethingAsync().should.eventually.equal("foo");
+
+A JAVASCRIPT TEST ENDS THROUGH EITHER ERROR OR done, 
+INCASE OF PROMISE , RESOLVE .
+
+
+Returning a promise
+The .finally(done) style is still verbose. Mocha gives us another option to test asynchronous code. Just return a promise from your ‘it’ callback:
+
+it('resolves', () => {
+  return resolvingPromise.then( (result) => {
+    expect(result).to.equal('promise resolved');
+  });
+});
+Although this style is most common, certainly combined with chai-as-promised, I would recommend against it. When you forget to type ‘return’, your test is evergreen and there is no safeguard to warn you. That’s an easy mistake to make…
+
+Async functions stop in case of an event ?? 
+How does this seem to work ??
