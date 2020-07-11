@@ -1,0 +1,59 @@
+Literal Characters:
+	- Simple characters without special meaning
+	- Eg a, b, c, etc
+
+Special Characters:
+	- certain characters reserved for special use.
+	- The 12 special characters are:
+		- \
+		- ^
+		- $
+		- ?
+		- *
+		- +
+		- (
+		- )
+		- [
+		- ]
+		- {
+		- }
+	- Note: Quotations like " and ' are not special characters
+	- Special characters with backslash --> Normal Characters 
+		- Eg: \(, \+
+	- Normal characters with backslash --> Special Characters
+		- Eg: \n (newline), \d (digit)
+  
+Non printable Characters:
+	- Some commonly used non printable characters are
+		- \t: for tabs
+		- \n: newline for unix
+		- \r\n: newline in windows
+		- \R: matches CR, LF, CRLf --> all types of line breaks
+			-	It treats \r\n as indivisible if they occur together.
+		Control Characters:
+			- \cA: ctrl + A
+			- \cB: ctrl + B
+
+To match an unicode character:
+	- \uFFFF: Enter the hexadecimal representation of the character
+
+How the regex machine works internally:
+	- The Regex engine always returns the left most search.
+	- Uses backtracking to check the string with each token of the regex.
+
+Character Classes: 
+	- Notation: []
+	- Order does not matter in regex classes
+	- Can be used to match a set of characters
+	- Matches a single character
+	- Eg: gr[ae]y matches 'gray' or 'grey', not both
+	- We can use ranges
+	- Eg: [A-Za-z_][A-Za-z_0-9]* A normal c++ identifier
+	- We can use negative character classes by starting the class with ^
+	- Eg: a[^j] - a followed by a character that's not 'j'
+	- Most of the special characters like $, +, * do not have to be backslashed 
+		to be used inside character classes, and the mileage varies here
+	How the regex machine works for character classes:
+		- Try to match each element of the class.
+
+
