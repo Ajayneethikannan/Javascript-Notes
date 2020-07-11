@@ -1,0 +1,30 @@
+{
+  "name": "JavascriptNotes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "eloquent.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "learn": "webpack-dev-server --env.NODE_ENV=local --env.learn --config ./webpack.config.js",
+    "practice": "webpack-dev-server --config ./webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ajayneethikannan/Javascript-Notes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ajayneethikannan/Javascript-Notes/issues"
+  },
+  "homepage": "https://github.com/Ajayneethikannan/Javascript-Notes#readme",
+  "devDependencies": {
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "react": "^16.13.1"
+  }
+}

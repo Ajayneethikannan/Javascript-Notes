@@ -799,3 +799,13 @@ Although this style is most common, certainly combined with chai-as-promised, I 
 
 Async functions stop in case of an event ?? 
 How does this seem to work ??
+
+npm is a tool mainly used to install packages.
+npx is a tool to execute packages.
+
+Webpack:
+
+A tool used to compile javascript modules
+Webpack is a static module bundler.
+When you run the command, it builds a dependency graph of the modules needed by 
+your application and then generates one or more bundles.

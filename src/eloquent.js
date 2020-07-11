@@ -117,7 +117,7 @@ let day1 = {
 /*
 Object properties which do not have valid binding names, have to be quoted
 */
-let map = {
+let umap = {
     'Hey!': 'A form of greeting',
     'One hundred and twenty five': 125
 }
@@ -256,7 +256,7 @@ function printResult (first, second, ...others) {
     console.log('Here are the others ', others);
 }
 
-results = ["Snape", "James", "Sirius", "Lupin", "Tom"] ;
+let results = ["Snape", "James", "Sirius", "Lupin", "Tom"] ;
 printResult(...results);
 
 /*
@@ -346,3 +346,187 @@ Serializing the data --> Making the object have a flat description
 3. Comments not allowed.
 
 */
+
+
+/*
+HIGHER ORDER FUNCTIONS
+*/
+
+/*
+Abstractions hide details and give us the ability to talk about 
+problems at a higher level
+Using abstraction we can focus only on the parts needed at the time.
+*/
+
+/*
+Plain functions are good for abstraction, but sometimes they fall 
+short
+*/
+
+/*
+Functions that operate on other functions, by taking functions as arguments
+or by returning new functions are called as higher order functions
+
+Normal functions - Provide abstraction over normal values (strings, numbers, objects)
+Higher order functions - Provide abstraction over ACTIONS.
+*/
+
+// Function that creates a new function
+
+function createMultiplier(multiplier) {
+    const func = number => multiplier * number;
+    return func;
+}
+console.log(createMultiplier(10)(100));
+
+
+// Wrap around functions and add new concepts to them 
+
+function noise(func) {
+    return (...args) => { // Collect the args here
+        console.log('The arguments are ', args);
+        let result = func(...args);
+        console.log('The result was ', result);
+        return result;
+    }
+}
+const min = noise(Math.min);
+let minimum = min(1, 2, 3);
+
+
+// Some higher order functions
+
+// Filtering arrays
+import SCRIPTS from './scripts.js';
+
+// SCRIPTS store the scripts information
+
+// Some High order functions
+
+// Filter --> Choose elements from the array based on a conditional action
+function filter(array, test_func) {
+    let result = [];
+    for (let ele of array) {
+        if (test_func(ele)) result.push(ele);
+    }
+    return result;
+}
+console.log(filter(SCRIPTS, script => script.living)); // return only the living scripts
+
+
+// Map --> To transform the elements of the array
+function map(array, func) {
+    let result = [];
+    for (let ele of array) {
+        result.push(func(ele));
+    }
+    return result;
+}
+console.log(map(SCRIPTS, script => script.name));
+
+// Reduce --> A summarising function
+function reduce(array, func, start) {
+    if (start == undefined) {
+        if (array.length) start = array[0];
+        else return;
+    }
+    let current = start;
+    for (let ele of array) {
+        current = func(current, ele);
+    }
+    return current;
+}
+
+console.log(reduce([1 , 2, 3, 4], (a, b) => a*b, 1));
+
+function characterCount(script) { // Notice the use of destructuring
+    return script.ranges.reduce((count, [from, to]) => {
+        return count + (to - from);
+    }, 0);
+}
+
+console.log(SCRIPTS.map(script => characterCount(script)));
+
+
+// Reduce can also be used to calculate max, min values easily
+
+max = SCRIPTS.reduce((current, script) => {
+    current = (characterCount(script) < characterCount(current)) ? current: script;
+    return current;
+});
+
+console.log(max);
+
+
+// Some --> Higher order function, which takes a test function and tell you whether that function returns true for any of the elements in the array.
+
+/*
+Difference between destructuring and spread operator
+
+Destructuring is used to create new bindings that will point to the respective bindings
+STORED INSIDE the object with the same name
+Or to create new bindings that will point to the bindings STORED 
+INSIDE the array within the same correspoding position according to the indexing.
+
+*/
+
+
+
+/*
+COMPOSABILITY OF FUNCTIONS
+
+Using higher order functions, you can easily combine the different operations such as
+filter, then map, then reduce together. This is called composability.
+Immediately after applying map, you can apply the other functions simultaneously
+There is proper code separation for each action, instead of using one while loop, and different conditional statements.
+Here intermediate values are also represented as coherent units.
+
+Here we have to make the distinction between speed and readability.
+Normal code using loops and branching might be much faster sometimes, and will be useful when we are working on large data.
+Meaning the less abstract style might be worth the extra speed.
+
+It improves code separation for proper understanding, less code.
+*/
+
+
+
+/*
+A little about unicode characters
+Javascript strings use UTF - 16 format
+Most the of the unicode characters are represented using a single 16 bit code
+Uncommon symbols, such as chinese characters, emojis use 2 sets of 16 bit codes. ( a pair of 16 bit code so 32 bit) to represent
+This breaks usual string methods as string.length and string indexing
+
+So preferably use for of loop for looping over strings.
+Use String.prototype.codePointAt(index) to get entire characters properly.
+
+*/
+
+
+
+
+
+/*
+The Secret life of objects
+*/
+
+function greet() {
+    console.log(`Hello my name is ${this.name}!`);
+}
+
+let obj = {
+    type: 'cat',
+    name: 'Ajay'
+};
+
+greet.call(obj);
+
+function normalize() {
+    console.log(this.coords.map(n => n/this.length));
+}
+
+normalize.call({
+    coords: [1, 2, 3],
+    length: 3
+});
+
